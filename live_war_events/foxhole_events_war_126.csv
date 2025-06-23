@@ -1,3 +1,3 @@
-Timestamp,War ID,War Number,Map,Icon Type,Icon Category,Team
-2025-06-23T15:15:13.463362,ef35d360-851e-4522-9f50-499976c2c124,126,FishermansRowHex,28,Unknown,NONE
-2025-06-23T15:15:46.578027,ef35d360-851e-4522-9f50-499976c2c124,126,FishermansRowHex,28,Unknown,COLONIALS
+Timestamp,War Time,Minutes Since War Start,War ID,War Number,Map,Icon Type,Icon Category,Team
+2025-06-23T15:59:47.913443,5d 05h 29m,7529,ef35d360-851e-4522-9f50-499976c2c124,126,EndlessShoreHex,56,Town Base 1,COLONIALS
+2025-06-23T16:00:28.898503,5d 05h 30m,7530,ef35d360-851e-4522-9f50-499976c2c124,126,FishermansRowHex,28,Observation Tower,NONE

@@ -1,7 +1,7 @@
 import os
 import csv
 import requests
-from datetime import datetime
+from datetime import datetime, timedelta
 import time
 
 # === Config ===
@@ -24,6 +24,20 @@ def get_csv_paths(war_number):
     summary_csv = os.path.join(DATA_DIR, f"war_{war_number}_summary.csv")
     return per_map_csv, summary_csv
 
+def is_resistance_phase(war_state):
+    return war_state.get("resistanceStartTime") is not None and war_state.get("conquestEndTime") is not None
+
+def format_war_time(start_time):
+    elapsed = datetime.utcnow() - datetime.utcfromtimestamp(start_time / 1000)
+    days = elapsed.days
+    hours, remainder = divmod(elapsed.seconds, 3600)
+    minutes = remainder // 60
+    return f"{days}d {hours}h {minutes}m"
+
+def get_minutes_since_start(start_time):
+    elapsed = datetime.utcnow() - datetime.utcfromtimestamp(start_time / 1000)
+    return int(elapsed.total_seconds() // 60)
+
 def fetch_and_log():
     now = datetime.utcnow().isoformat()
     war_state = get_current_war_state()
@@ -32,6 +46,18 @@ def fetch_and_log():
     if war_number is None:
         print("❌ ERROR: Could not fetch war number.")
         return
+
+    if is_resistance_phase(war_state):
+        print(f"⏸️ War #{war_number} is in resistance phase — skipping log at {now}.")
+        return
+
+    conquest_start = war_state.get("conquestStartTime")
+    if conquest_start is None:
+        print(f"❌ ERROR: No conquest start time found for war #{war_number}.")
+        return
+
+    war_time = format_war_time(conquest_start)
+    minutes_since_start = get_minutes_since_start(conquest_start)
 
     per_map_csv, summary_csv = get_csv_paths(war_number)
     os.makedirs(DATA_DIR, exist_ok=True)
@@ -54,7 +80,7 @@ def fetch_and_log():
         maps = get_map_list()
         for map_name in maps:
             report = get_war_report(map_name)
-            if report:
+            if isinstance(report, dict):
                 writer.writerow([
                     now, war_number, map_name,
                     report.get("dayOfWar"),
@@ -65,6 +91,8 @@ def fetch_and_log():
                 total_enlistments += report.get("totalEnlistments", 0)
                 total_colonial_casualties += report.get("colonialCasualties", 0)
                 total_warden_casualties += report.get("wardenCasualties", 0)
+            else:
+                print(f"⚠️ Skipped bad report for map: {map_name}")
 
     # === Logging overall war summary ===
     summary_exists = os.path.exists(summary_csv)
@@ -73,11 +101,13 @@ def fetch_and_log():
         if not summary_exists:
             writer.writerow([
                 "timestamp", "war_number", "winner", "conquest_start_time",
+                "war_time", "minutes_since_war_start",
                 "total_maps", "total_enlistments",
                 "total_colonial_casualties", "total_warden_casualties"
             ])
         writer.writerow([
-            now, war_number, war_state.get("winner"), war_state.get("conquestStartTime"),
+            now, war_number, war_state.get("winner"), conquest_start,
+            war_time, minutes_since_start,
             len(maps), total_enlistments,
             total_colonial_casualties, total_warden_casualties
         ])

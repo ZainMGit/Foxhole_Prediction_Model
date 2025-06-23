@@ -1,0 +1,19 @@
+app = "foxhole-logger"
+
+primary_region = "sjc"
+
+[build]
+  image = "python:3.11-slim"
+
+[env]
+  PYTHONUNBUFFERED = "1"
+
+[deploy]
+  release_command = "true"
+
+[processes]
+  app = "python foxhole_war_logger.py"
+
+[mounts]
+  source = "data"
+  destination = "/data"

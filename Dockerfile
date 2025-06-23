@@ -12,3 +12,4 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # Run the logger script
 CMD ["python", "foxhole_war_logger.py"]
+

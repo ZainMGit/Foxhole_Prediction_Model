@@ -6,7 +6,7 @@ import time
 
 # === Config ===
 BASE_URL = "https://war-service-live.foxholeservices.com/api"
-DATA_DIR = "./data"
+DATA_DIR = "./war_data"
 INTERVAL = 900  # 15 minutes
 
 def get_current_war_state():

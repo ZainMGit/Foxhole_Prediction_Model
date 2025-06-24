@@ -1,8 +1,7 @@
 app = "foxhole-logger"
-primary_region = "sjc"  # Or your closest Fly.io region
+primary_region = "sjc"
 
 [build]
-  image = "python:3.10-slim"  # You can change to 3.8 if required
 
 [env]
   PYTHONUNBUFFERED = "1"
@@ -14,7 +13,3 @@ primary_region = "sjc"  # Or your closest Fly.io region
   [[services.ports]]
     port = 80
     handlers = ["http"]
-
-  [[services.ports]]
-    port = 443
-    handlers = ["tls", "http"]

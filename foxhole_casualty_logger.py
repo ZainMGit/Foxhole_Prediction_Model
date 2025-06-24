@@ -1,7 +1,7 @@
 import os
 import csv
 import requests
-from datetime import datetime, timedelta
+from datetime import datetime, timezone
 import time
 
 # === Config ===
@@ -28,18 +28,22 @@ def is_resistance_phase(war_state):
     return war_state.get("resistanceStartTime") is not None and war_state.get("conquestEndTime") is not None
 
 def format_war_time(start_time):
-    elapsed = datetime.utcnow() - datetime.utcfromtimestamp(start_time / 1000)
+    now = datetime.now(timezone.utc)
+    start_dt = datetime.fromtimestamp(start_time / 1000, tz=timezone.utc)
+    elapsed = now - start_dt
     days = elapsed.days
     hours, remainder = divmod(elapsed.seconds, 3600)
     minutes = remainder // 60
     return f"{days}d {hours}h {minutes}m"
 
 def get_minutes_since_start(start_time):
-    elapsed = datetime.utcnow() - datetime.utcfromtimestamp(start_time / 1000)
+    now = datetime.now(timezone.utc)
+    start_dt = datetime.fromtimestamp(start_time / 1000, tz=timezone.utc)
+    elapsed = now - start_dt
     return int(elapsed.total_seconds() // 60)
 
 def fetch_and_log():
-    now = datetime.utcnow().isoformat()
+    now = datetime.now(timezone.utc).isoformat()
     war_state = get_current_war_state()
     war_number = war_state.get("warNumber")
 
@@ -72,7 +76,7 @@ def fetch_and_log():
         writer = csv.writer(f)
         if not per_map_exists:
             writer.writerow([
-                "timestamp", "war_number", "map_name",
+                "timestamp", "war_number", "war_time", "minutes_since_war_start", "map_name",
                 "day_of_war", "total_enlistments",
                 "colonial_casualties", "warden_casualties"
             ])
@@ -82,7 +86,7 @@ def fetch_and_log():
             report = get_war_report(map_name)
             if isinstance(report, dict):
                 writer.writerow([
-                    now, war_number, map_name,
+                    now, war_number, war_time, minutes_since_start, map_name,
                     report.get("dayOfWar"),
                     report.get("totalEnlistments"),
                     report.get("colonialCasualties"),

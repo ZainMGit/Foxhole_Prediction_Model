@@ -1,19 +1,30 @@
 app = "foxhole-logger"
-
-primary_region = "sjc"
+primary_region = "iad" # change to your closest Fly.io region
 
 [build]
-  image = "python:3.11-slim"
-
-[env]
-  PYTHONUNBUFFERED = "1"
-
-[deploy]
-  release_command = "true"
-
-[processes]
-  app = "python foxhole_war_logger.py"
+  image = "Dockerfile"
 
 [mounts]
-  source = "data"
+  source = "foxhole_data"
   destination = "/data"
+
+[env]
+  PYTHONUNBUFFERED = "TRUE"
+
+[processes]
+  app = "sh -c 'python event_logger.py & python casualty_logger.py'"
+
+[experimental]
+  auto_rollback = true
+
+[[services]]
+  internal_port = 8080
+  protocol = "tcp"
+
+  [[services.ports]]
+    handlers = ["http"]
+    port = 80
+
+  [[services.ports]]
+    handlers = ["tls", "http"]
+    port = 443

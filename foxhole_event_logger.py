@@ -2,7 +2,7 @@ import requests
 import time
 import csv
 import os
-from datetime import datetime
+from datetime import datetime, timezone
 
 BASE = "https://war-service-live.foxholeservices.com/api"
 MAPS_URL = f"{BASE}/worldconquest/maps"
@@ -36,7 +36,7 @@ csv_file = None
 current_war_number = None
 
 def get_war_info():
-    r = requests.get(WAR_URL)
+    r = requests.get(WAR_URL, timeout=10)
     r.raise_for_status()
     data = r.json()
     return (
@@ -51,8 +51,8 @@ def is_resistance_phase(resistance_start, conquest_end):
     return resistance_start is not None and conquest_end is not None
 
 def format_war_time(conquest_start_unix_ms):
-    now = datetime.utcnow()
-    delta = now - datetime.utcfromtimestamp(conquest_start_unix_ms / 1000)
+    now = datetime.now(timezone.utc)
+    delta = now - datetime.fromtimestamp(conquest_start_unix_ms / 1000, tz=timezone.utc)
     days = delta.days
     hours, remainder = divmod(delta.seconds, 3600)
     minutes = remainder // 60
@@ -65,12 +65,12 @@ def get_minutes_since_war_started(conquest_start_unix_ms):
     return elapsed_sec // 60
 
 def get_active_maps():
-    r = requests.get(MAPS_URL)
+    r = requests.get(MAPS_URL, timeout=10)
     r.raise_for_status()
     return r.json()
 
 def get_dynamic_map(map_name):
-    r = requests.get(DYNAMIC_URL.format(map_name))
+    r = requests.get(DYNAMIC_URL.format(map_name), timeout=10)
     r.raise_for_status()
     return r.json()
 
@@ -106,7 +106,7 @@ def log_event(war_id, war_number, war_time, minutes_since_start, map_name, icon_
     with open(csv_file, mode="a", newline="") as file:
         writer = csv.writer(file)
         writer.writerow([
-            datetime.now().isoformat(),
+            datetime.now(timezone.utc).isoformat(),
             war_time,
             minutes_since_start,
             war_id,
@@ -170,7 +170,7 @@ def run_tracker():
                             cat = icon_category(item["iconType"])
                             war_time = format_war_time(conquest_start)
                             minutes_since = get_minutes_since_war_started(conquest_start)
-                            print(f"[{datetime.now()}] {map_name}: iconType {item['iconType']} ({cat}) changed {prev_team} → {team}")
+                            print(f"[{datetime.now(timezone.utc)}] {map_name}: iconType {item['iconType']} ({cat}) changed {prev_team} → {team}")
                             log_event(war_id, war_number, war_time, minutes_since, map_name, item["iconType"], cat, prev_team, team)
 
                 previous_state[map_name] = current

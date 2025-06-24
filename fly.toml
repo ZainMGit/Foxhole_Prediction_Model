@@ -1,13 +1,20 @@
 app = "foxhole-logger"
-primary_region = "iad"
+primary_region = "sjc"  # Or your closest Fly.io region
 
-
-[mounts]
-  source = "foxhole_data"
-  destination = "/data"
+[build]
+  image = "python:3.10-slim"  # You can change to 3.8 if required
 
 [env]
-  PYTHONUNBUFFERED = "TRUE"
+  PYTHONUNBUFFERED = "1"
 
-[processes]
-  app = "sh -c 'python foxhole_event_logger.py & python foxhole_casualty_logger.py'"
+[[services]]
+  internal_port = 8080
+  protocol = "tcp"
+
+  [[services.ports]]
+    port = 80
+    handlers = ["http"]
+
+  [[services.ports]]
+    port = 443
+    handlers = ["tls", "http"]

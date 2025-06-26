@@ -8,7 +8,7 @@ BASE = "https://war-service-live.foxholeservices.com/api"
 MAPS_URL = f"{BASE}/worldconquest/maps"
 DYNAMIC_URL = f"{BASE}/worldconquest/maps/{{}}/dynamic/public"
 WAR_URL = f"{BASE}/worldconquest/war"
-POLL_INTERVAL = 10
+POLL_INTERVAL = 20
 
 FOLDER = "live_war_events"
 os.makedirs(FOLDER, exist_ok=True)

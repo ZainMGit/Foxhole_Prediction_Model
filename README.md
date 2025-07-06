@@ -3,7 +3,7 @@
 This project tracks live war events and casualty data from the game [Foxhole](https://www.foxholegame.com/) using the official WarAPI. It stores event data and casualty statistics in CSV files. Later this data will be used withy machine learning models in order to predict the outcome of wars.
 
 
-## Data Last Updated - 7/4/2025
+## Data Last Updated - 7/5/2025
 
 
 ## Features
